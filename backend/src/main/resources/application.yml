@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/library
-    username: library_user
-    password: secret
+    username: postgres
+    password: 12345
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

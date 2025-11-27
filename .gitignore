@@ -1,0 +1,16 @@
+пAdd-Content -Path ".gitignore" -Value @"
+# IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Build
+target/
+*.jar
+*.war
+
+# Logs
+logs/
+*.log
+"@
