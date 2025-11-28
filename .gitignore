@@ -1,4 +1,3 @@
-пAdd-Content -Path ".gitignore" -Value @"
 # IDEA
 .idea/
 *.iws
@@ -13,4 +12,12 @@ target/
 # Logs
 logs/
 *.log
-"@
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend dependencies
+frontend/node_modules/
