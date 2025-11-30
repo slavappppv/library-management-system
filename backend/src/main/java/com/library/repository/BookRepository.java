@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Integer> {
-    // Spring Data JPA автоматически создаст методы:
-    // findAll(), findById(), save(), delete(), count()
 }

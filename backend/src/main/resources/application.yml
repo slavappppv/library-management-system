@@ -12,6 +12,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  jwt:
+    secret: development-secret-key-2024
 
 server:
   port: 8080

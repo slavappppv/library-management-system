@@ -12,11 +12,13 @@ public class Journal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "book_id", nullable = false)
-    private Integer bookId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "book_id")
+    private Book book;
 
-    @Column(name = "client_id", nullable = false)
-    private Integer clientId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "client_id")
+    private Client client;
 
     @Column(name = "date_beg", nullable = false)
     private LocalDate dateBeg;

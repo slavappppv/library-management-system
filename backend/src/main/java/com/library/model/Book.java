@@ -17,6 +17,7 @@ public class Book {
     @Column(name = "cnt", nullable = false)
     private Integer count;
 
-    @Column(name = "type_id")
-    private Integer typeId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "type_id")
+    private BookType bookType;
 }

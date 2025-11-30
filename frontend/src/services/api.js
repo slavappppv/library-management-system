@@ -6,7 +6,6 @@ const api = axios.create({
   baseURL: API_BASE,
 });
 
-// Перехватчик для автоматической добавки токена к каждому запросу
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -20,7 +19,6 @@ api.interceptors.request.use(
   }
 );
 
-// Перехватчик для обработки ошибок авторизации
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -39,7 +37,15 @@ export const bookService = {
   createBook: (book) => api.post('/books', book),
   updateBook: (id, book) => api.put(`/books/${id}`, book),
   deleteBook: (id) => api.delete(`/books/${id}`),
-  post: (url, data) => api.post(url, data), // Добавили общий метод POST
+  post: (url, data) => api.post(url, data),
+};
+
+export const bookTypeService = {
+  getAllBookTypes: () => api.get('/book-types'),
+  getBookTypeById: (id) => api.get(`/book-types/${id}`),
+  createBookType: (bookType) => api.post('/book-types', bookType),
+  updateBookType: (id, bookType) => api.put(`/book-types/${id}`, bookType),
+  deleteBookType: (id) => api.delete(`/book-types/${id}`),
 };
 
 export default api;
