@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { bookService } from '../services/api';
 import BookForm from './BookForm';
+import GridView from './GridView';
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -58,6 +59,13 @@ const BookList = () => {
     }
   };
 
+  const columns = [
+    { field: 'id', header: 'ID' },
+    { field: 'name', header: 'Название книги' },
+    { field: 'count', header: 'Количество' },
+    { field: 'typeId', header: 'ID типа' }
+  ];
+
   if (loading) return <div>Загрузка книг...</div>;
 
   if (showForm) {
@@ -79,33 +87,12 @@ const BookList = () => {
         </button>
       </div>
 
-      {books.map(book => (
-        <div key={book.id} className="book-card">
-          <h3 className="book-title">{book.name}</h3>
-          <p className="book-author">Количество: {book.count}</p>
-          <p className="book-year">ID типа: {book.typeId}</p>
-          <div style={{marginTop: '10px', display: 'flex', gap: '10px'}}>
-            <button onClick={() => handleEdit(book)} style={{
-              padding: '5px 10px',
-              background: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px'
-            }}>
-              Изменить
-            </button>
-            <button onClick={() => handleDelete(book.id)} style={{
-              padding: '5px 10px',
-              background: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px'
-            }}>
-              Удалить
-            </button>
-          </div>
-        </div>
-      ))}
+      <GridView
+        data={books}
+        columns={columns}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
     </div>
   );
 };
