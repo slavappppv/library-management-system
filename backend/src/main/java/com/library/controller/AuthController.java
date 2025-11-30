@@ -2,7 +2,9 @@ package com.library.controller;
 
 import com.library.config.JwtUtil;
 import com.library.model.User;
+import com.library.model.Client;
 import com.library.repository.UserRepository;
+import com.library.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +21,9 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -77,30 +82,55 @@ public class AuthController {
             return ResponseEntity.status(500).body("Server error");
         }
     }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         System.out.println("=== REGISTER ATTEMPT ===");
         System.out.println("Username: " + request.getUsername());
-        System.out.println("Password: " + request.getPassword());
 
         try {
             // Проверяем нет ли уже такого пользователя
             if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-                System.out.println("Username already exists");
                 return ResponseEntity.badRequest().body("Username already exists");
             }
 
-            // Создаем нового пользователя
+            // Проверяем паспортные данные на уникальность
+            if (clientRepository.existsByPassportSeriaAndPassportNumber(
+                    request.getPassportSeria(), request.getPassportNumber())) {
+                return ResponseEntity.badRequest().body("Client with this passport already exists");
+            }
+
+            // 1. Создаем клиента
+            Client client = new Client();
+            client.setFirstName(request.getFirstName());
+            client.setLastName(request.getLastName());
+            client.setFatherName(request.getFatherName());
+            client.setPassportSeria(request.getPassportSeria());
+            client.setPassportNumber(request.getPassportNumber());
+            Client savedClient = clientRepository.save(client);
+
+            // 2. Создаем пользователя
             User user = new User();
             user.setUsername(request.getUsername());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setRole("ROLE_USER"); // По умолчанию обычный пользователь
+            user.setRole("ROLE_READER");
             user.setEnabled(true);
+            user.setClient(savedClient);
 
-            userRepository.save(user);
+            User savedUser = userRepository.save(user);
+
+            // 3. Генерируем токен и возвращаем его (как при логине)
+            String token = jwtUtil.generateToken(request.getUsername());
+
+            Map<String, String> response = new HashMap<>();
+            response.put("token", token);
+            response.put("username", savedUser.getUsername());
+            response.put("role", savedUser.getRole());
+            response.put("message", "User registered successfully");
+
             System.out.println("User registered successfully: " + request.getUsername());
 
-            return ResponseEntity.ok("User registered successfully");
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             System.out.println("Registration failed: " + e.getMessage());
@@ -112,12 +142,27 @@ public class AuthController {
     public static class RegisterRequest {
         private String username;
         private String password;
+        private String firstName;
+        private String lastName;
+        private String fatherName;
+        private String passportSeria;
+        private String passportNumber;
 
         // getters and setters
         public String getUsername() { return username; }
         public void setUsername(String username) { this.username = username; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
+        public String getFirstName() { return firstName; }
+        public void setFirstName(String firstName) { this.firstName = firstName; }
+        public String getLastName() { return lastName; }
+        public void setLastName(String lastName) { this.lastName = lastName; }
+        public String getFatherName() { return fatherName; }
+        public void setFatherName(String fatherName) { this.fatherName = fatherName; }
+        public String getPassportSeria() { return passportSeria; }
+        public void setPassportSeria(String passportSeria) { this.passportSeria = passportSeria; }
+        public String getPassportNumber() { return passportNumber; }
+        public void setPassportNumber(String passportNumber) { this.passportNumber = passportNumber; }
     }
 
     public static class LoginRequest {

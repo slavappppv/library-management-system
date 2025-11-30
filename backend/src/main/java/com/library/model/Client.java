@@ -25,4 +25,7 @@ public class Client {
 
     @Column(name = "passport_number", nullable = false, length = 6)
     private String passportNumber;
+
+    @OneToOne(mappedBy = "client")
+    private User user;
 }

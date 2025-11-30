@@ -15,11 +15,15 @@ public class User {
     private String username;
 
     @Column(nullable = false, length = 100)
-    private String password; // будем хранить хеш
+    private String password;
 
     @Column(nullable = false, length = 20)
-    private String role; // например: "LIBRARIAN", "ADMIN"
+    private String role;
 
     @Column(nullable = false)
     private Boolean enabled = true;
+
+    @OneToOne
+    @JoinColumn(name = "client_id")
+    private Client client;
 }
