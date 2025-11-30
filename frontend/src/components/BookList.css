@@ -1,0 +1,21 @@
+.books-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.add-book-button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.add-book-button:hover {
+  transform: translateY(-2px);
+}

@@ -1,0 +1,9 @@
+.login-container {
+  text-align: center;
+}
+
+.welcome-message {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #2c3e50;
+}
