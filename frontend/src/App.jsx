@@ -23,18 +23,18 @@ function App() {
       <div className="app-container">
         {isAuthenticated && (
           <nav className="app-nav">
-            <h1 className="app-title">📚 Управление Библиотекой</h1>
+            <h1 className="app-title">📚 Библиотека</h1>
             <div className="nav-buttons">
-              <button
-                className="nav-button"
-                onClick={() => setCurrentView("books")}
-              >
-                📖 Список книг
+              <button className="nav-button" onClick={() => setCurrentView("reference")}>
+                📋 СПРАВОЧНИКИ
               </button>
-              <button
-                className="nav-button"
-                onClick={handleLogout}
-              >
+              <button className="nav-button" onClick={() => setCurrentView("journals")}>
+                📖 ЖУРНАЛЫ
+              </button>
+              <button className="nav-button" onClick={() => setCurrentView("reports")}>
+                📊 ОТЧЕТЫ
+              </button>
+              <button className="nav-button" onClick={handleLogout}>
                 🚪 Выйти
               </button>
             </div>
@@ -45,7 +45,12 @@ function App() {
           {!isAuthenticated ? (
             <Login onLogin={handleLoginSuccess} />
           ) : (
-            currentView === "books" && <BookList />
+            <>
+              {currentView === "books" && <BookList />}
+              {currentView === "reference" && <div>Раздел СПРАВОЧНИКИ</div>}
+              {currentView === "journals" && <div>Раздел ЖУРНАЛЫ</div>}
+              {currentView === "reports" && <div>Раздел ОТЧЕТЫ</div>}
+            </>
           )}
         </main>
       </div>
