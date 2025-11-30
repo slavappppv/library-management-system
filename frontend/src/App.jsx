@@ -43,7 +43,7 @@ function App() {
 
         <main className="app-content">
           {!isAuthenticated ? (
-            <Login onLoginSuccess={handleLoginSuccess} />
+            <Login onLogin={handleLoginSuccess} />
           ) : (
             currentView === "books" && <BookList />
           )}

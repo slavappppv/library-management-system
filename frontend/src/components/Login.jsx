@@ -18,13 +18,14 @@ const Login = ({ onLogin }) => {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userRole', response.data.role);
-        onLogin(response.data.role);
+        onLogin();
       } else {
         setError(response.data.error || 'Something went wrong');
       }
     } catch (error) {
-      setError(error.response?.data?.error || 'Network error');
-    }
+        console.log("Error details:", error);
+        setError(error.response?.data || 'Network error');
+      }
   };
 
   return (
