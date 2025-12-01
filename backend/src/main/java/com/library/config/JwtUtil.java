@@ -1,6 +1,7 @@
 package com.library.config;
 
 import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -11,12 +12,17 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
+import com.library.model.User;
+import com.library.repository.UserRepository;
 
 @Component
 public class JwtUtil {
     private final PrivateKey privateKey;
     private final PublicKey publicKey;
-    private final long expirationMs = 86400000; // 24 часа
+    private final long expirationMs = 86400000;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public JwtUtil() {
         try {

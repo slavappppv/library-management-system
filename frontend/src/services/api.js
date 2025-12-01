@@ -48,4 +48,19 @@ export const bookTypeService = {
   deleteBookType: (id) => api.delete(`/book-types/${id}`),
 };
 
+export const journalService = {
+  getAllJournalRecords: () => api.get('/journal'),
+  getJournalRecordById: (id) => api.get(`/journal/${id}`),
+  createJournalRecord: (journal) => api.post('/journal', journal),
+  updateJournalRecord: (id, journal) => api.put(`/journal/${id}`, journal),
+  deleteJournalRecord: (id) => api.delete(`/journal/${id}`),
+};
+
+export const readerService = {
+    getAvailableBooks: () => api.get('/reader/available-books'),
+    getCurrentBooks: () => api.get('/reader/current-books'),
+    getBookHistory: () => api.get('/reader/book-history'),
+    takeBook: (bookId) => api.post('/reader/take-book', { bookId }),
+};
+
 export default api;

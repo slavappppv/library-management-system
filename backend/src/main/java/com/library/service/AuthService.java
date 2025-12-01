@@ -58,7 +58,7 @@ public class AuthService {
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(passwordEncoder.encode(password));
-        newUser.setRole("READER");  // Обычные пользователи - читатели
+        newUser.setRole("ROLE_READER");
         newUser.setEnabled(true);
 
         userRepository.save(newUser);

@@ -33,6 +33,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+
         System.out.println("=== LOGIN ATTEMPT ===");
         System.out.println("Username: " + request.getUsername());
         System.out.println("Password length: " + (request.getPassword() != null ? request.getPassword().length() : "null"));

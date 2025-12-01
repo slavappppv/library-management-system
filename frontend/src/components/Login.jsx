@@ -7,7 +7,6 @@ const Login = ({ onLogin }) => {
     const [error, setError] = useState('');
     const [isLogin, setIsLogin] = useState(true);
 
-    // НОВЫЕ ПОЛЯ ДЛЯ РЕГИСТРАЦИИ
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [fatherName, setFatherName] = useState('');
@@ -33,11 +32,14 @@ const Login = ({ onLogin }) => {
                 };
 
             const response = await bookService.post(endpoint, data);
+            console.log('Login response:', response.data);
+            console.log('Token:', response.data.token);
+            console.log('Role:', response.data.role);
 
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userRole', response.data.role);
-                onLogin();
+                onLogin(response.data.role);
             } else {
                 setError(response.data.error || 'Something went wrong');
             }

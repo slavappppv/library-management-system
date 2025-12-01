@@ -24,6 +24,20 @@ const BookList = () => {
         }
     };
 
+    const handleSave = async (bookData) => {
+        try {
+            if (editingBook) {
+                await bookService.updateBook(editingBook.id, bookData);
+            } else {
+                await bookService.createBook(bookData);
+            }
+            setShowForm(false);
+            loadBooks();
+        } catch (error) {
+            console.error('Ошибка сохранения:', error);
+        }
+    };
+
     const handleAdd = () => {
         setEditingBook(null);
         setShowForm(true);
