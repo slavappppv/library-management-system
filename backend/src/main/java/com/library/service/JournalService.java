@@ -6,6 +6,7 @@ import com.library.model.Client;
 import com.library.repository.JournalRepository;
 import com.library.repository.BookRepository;
 import com.library.repository.ClientRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -52,29 +53,20 @@ public class JournalService {
         return journalRepository.findByClientIdAndDateRetIsNotNull(clientId);
     }
 
+    @Transactional
     public Journal takeBook(Integer bookId, Integer clientId) {
         if (journalRepository.existsByBookIdAndClientIdAndDateRetIsNull(bookId, clientId)) {
             throw new RuntimeException("Клиент уже взял эту книгу");
         }
 
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Книга не найдена"));
-
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new RuntimeException("Клиент не найдена"));
-
-        if (book.getCount() <= 0) {
-            throw new RuntimeException("Книга недоступна");
-        }
+        Book book = bookRepository.getReferenceById(bookId);
+        Client client = clientRepository.getReferenceById(clientId);
 
         Journal journal = new Journal();
         journal.setBook(book);
         journal.setClient(client);
         journal.setDateBeg(LocalDate.now());
         journal.setDateEnd(LocalDate.now().plusDays(book.getBookType().getDayCount()));
-
-        book.setCount(book.getCount() - 1);
-        bookRepository.save(book);
 
         return journalRepository.save(journal);
     }
