@@ -72,4 +72,15 @@ export const clientService = {
     deleteClient: (id) => api.delete(`/clients/${id}`),
 };
 
+export const reportService = {
+    getClientActiveBooksCount: (clientId) => api.get(`/reports/client/${clientId}/active-books-count`),
+    getClientTotalFine: (clientId) => api.get(`/reports/client/${clientId}/total-fine`),
+    getClientStats: (clientId) => api.get(`/reports/client/${clientId}/stats`),
+    getMaxSingleFine: () => api.get('/reports/max-single-fine'),
+    getTopPopularBooks: (limit = 3) => api.get(`/reports/popular-books?limit=${limit}`),
+
+    getBooksFullReport: () => api.get('/reports/books-full', { responseType: 'text' }),
+    getBooksStatisticsReport: () => api.get('/reports/books-statistics', { responseType: 'text' }),
+};
+
 export default api;

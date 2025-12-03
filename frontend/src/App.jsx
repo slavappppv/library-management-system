@@ -5,6 +5,7 @@ import ReaderDashboard from "./components/ReaderDashboard";
 import ReportsPanel from './components/ReportsPanel';
 import ReferencesPanel from './components/ReferencesPanel';
 import JournalList from './components/JournalList';
+import AnalyticsPanel from './components/AnalyticsPanel';
 import "./App.css";
 
 function App() {
@@ -73,6 +74,9 @@ function App() {
                   <button className="nav-button" onClick={() => setCurrentView("reports")}>
                     📊 ОТЧЕТЫ
                   </button>
+                  <button className="nav-button" onClick={() => setCurrentView("analytics")}>
+                      📊 Аналитика
+                  </button>
                 </>
               )}
               <button className="nav-button" onClick={handleLogout}>
@@ -92,6 +96,7 @@ function App() {
               {currentView === "reference" && <ReferencesPanel />}
               {currentView === "journals" && <JournalList />}
               {currentView === "reports" && <ReportsPanel />}
+              {currentView === "analytics" && <AnalyticsPanel />}
             </>
           )}
         </main>

@@ -59,7 +59,13 @@ public class JournalService {
             throw new RuntimeException("Клиент уже взял эту книгу");
         }
 
-        Book book = bookRepository.getReferenceById(bookId);
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Книга не найдена"));
+
+        if (book.getCount() <= 0) {
+            throw new RuntimeException("Книга недоступна (нет свободных экземпляров)");
+        }
+
         Client client = clientRepository.getReferenceById(clientId);
 
         Journal journal = new Journal();
@@ -68,6 +74,19 @@ public class JournalService {
         journal.setDateBeg(LocalDate.now());
         journal.setDateEnd(LocalDate.now().plusDays(book.getBookType().getDayCount()));
 
+        return journalRepository.save(journal);
+    }
+
+    @Transactional
+    public Journal returnBook(Integer journalId) {
+        Journal journal = journalRepository.findById(journalId)
+                .orElseThrow(() -> new RuntimeException("Запись журнала не найдена"));
+
+        if (journal.getDateRet() != null) {
+            throw new RuntimeException("Книга уже возвращена");
+        }
+
+        journal.setDateRet(LocalDate.now());
         return journalRepository.save(journal);
     }
 }

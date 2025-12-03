@@ -62,12 +62,16 @@ public class ReaderController {
     }
 
     @GetMapping("/book-history")
-    public List<Journal> getBookHistory(@RequestHeader("Authorization") String token) {
+    public List<JournalDTO> getBookHistory(@RequestHeader("Authorization") String token) {
         String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return journalService.getBookHistoryByClient(user.getClient().getId());
+        List<Journal> history = journalService.getBookHistoryByClient(user.getClient().getId());
+
+        return history.stream()
+                .map(journalMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/take-book")
@@ -90,5 +94,35 @@ public class ReaderController {
 
         public Integer getBookId() { return bookId; }
         public void setBookId(Integer bookId) { this.bookId = bookId; }
+    }
+
+    @PostMapping("/return-book")
+    public ResponseEntity<?> returnBook(@RequestBody ReturnBookRequest request,
+                                        @RequestHeader("Authorization") String token) {
+        try {
+            String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Проверяем что книга принадлежит этому читателю
+            Journal journal = journalService.getJournalRecordById(request.getJournalId())
+                    .orElseThrow(() -> new RuntimeException("Запись не найдена"));
+
+            if (!journal.getClient().getId().equals(user.getClient().getId())) {
+                return ResponseEntity.status(403).body("Эта книга не ваша");
+            }
+
+            Journal returnedJournal = journalService.returnBook(request.getJournalId());
+            return ResponseEntity.ok(journalMapper.toDTO(returnedJournal));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    public static class ReturnBookRequest {
+        private Integer journalId;
+
+        public Integer getJournalId() { return journalId; }
+        public void setJournalId(Integer journalId) { this.journalId = journalId; }
     }
 }

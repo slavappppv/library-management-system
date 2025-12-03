@@ -1,10 +1,15 @@
 package com.library.controller;
 
+import com.library.dto.PopularBookDTO;
+import com.library.dto.ClientStatsDTO;
 import com.library.model.Book;
 import com.library.repository.BookRepository;
+import com.library.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +22,11 @@ public class ReportController {
     @Autowired
     private BookRepository bookRepository;
 
-    // Отчет 1: Полный список книг (TXT)
+    @Autowired
+    private ReportService reportService;
+
+    // === СУЩЕСТВУЮЩИЕ ОТЧЕТЫ ===
+
     @GetMapping("/books-full")
     public String generateBooksReport() {
         List<Book> books = bookRepository.findAll();
@@ -30,7 +39,6 @@ public class ReportController {
             report.append("ID: ").append(book.getId()).append("\n");
             report.append("Название: ").append(book.getName()).append("\n");
             report.append("Количество: ").append(book.getCount()).append("\n");
-            // ИСПРАВЛЕНИЕ: используем bookType вместо typeId
             report.append("Тип: ").append(book.getBookType() != null ? book.getBookType().getType() : "Не указан").append("\n");
             report.append("--------------------------\n");
         }
@@ -39,12 +47,10 @@ public class ReportController {
         return report.toString();
     }
 
-    // Отчет 2: Статистика по типам книг (TXT)
     @GetMapping("/books-statistics")
     public String generateStatisticsReport() {
         List<Book> books = bookRepository.findAll();
 
-        // Группировка по bookType (объекту) вместо typeId
         Map<String, Integer> typeCounts = new HashMap<>();
         Map<String, Integer> typeTotal = new HashMap<>();
 
@@ -71,5 +77,58 @@ public class ReportController {
 
         report.append("\nВсего типов: ").append(typeCounts.size());
         return report.toString();
+    }
+
+    // === НОВАЯ СТАТИСТИКА (хранимые процедуры) ===
+
+    @GetMapping("/client/{clientId}/active-books-count")
+    public ResponseEntity<Integer> getClientActiveBooksCount(@PathVariable Integer clientId) {
+        try {
+            Integer count = reportService.getClientActiveBooksCount(clientId);
+            return ResponseEntity.ok(count);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/client/{clientId}/total-fine")
+    public ResponseEntity<BigDecimal> getClientTotalFine(@PathVariable Integer clientId) {
+        try {
+            BigDecimal fine = reportService.getClientTotalFine(clientId);
+            return ResponseEntity.ok(fine);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/client/{clientId}/stats")
+    public ResponseEntity<ClientStatsDTO> getClientStats(@PathVariable Integer clientId) {
+        try {
+            ClientStatsDTO stats = reportService.getClientStats(clientId);
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/max-single-fine")
+    public ResponseEntity<BigDecimal> getMaxSingleFine() {
+        try {
+            BigDecimal maxFine = reportService.getMaxSingleFine();
+            return ResponseEntity.ok(maxFine);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/popular-books")
+    public ResponseEntity<List<PopularBookDTO>> getTopPopularBooks(
+            @RequestParam(required = false, defaultValue = "3") Integer limit) {
+        try {
+            List<PopularBookDTO> popularBooks = reportService.getTopPopularBooks(limit);
+            return ResponseEntity.ok(popularBooks);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

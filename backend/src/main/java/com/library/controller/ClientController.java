@@ -1,5 +1,7 @@
 package com.library.controller;
 
+import com.library.dto.ClientDTO;
+import com.library.mapper.ClientMapper;
 import com.library.model.Client;
 import com.library.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/clients")
@@ -15,30 +18,39 @@ public class ClientController {
     @Autowired
     private ClientService clientService;
 
+    @Autowired
+    private ClientMapper clientMapper;  // ← Добавить
+
     @GetMapping
-    public List<Client> getAllClients() {
-        return clientService.getAllClients();
+    public List<ClientDTO> getAllClients() {  // ← Возвращать DTO
+        return clientService.getAllClients().stream()
+                .map(clientMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Client> getClientById(@PathVariable Integer id) {
+    public ResponseEntity<ClientDTO> getClientById(@PathVariable Integer id) {
         Optional<Client> client = clientService.getClientById(id);
-        return client.map(ResponseEntity::ok)
+        return client.map(c -> ResponseEntity.ok(clientMapper.toDTO(c)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Client createClient(@RequestBody Client client) {
-        return clientService.saveClient(client);
+    public ClientDTO createClient(@RequestBody ClientDTO clientDTO) {  // ← Принимать DTO
+        Client client = clientMapper.toEntity(clientDTO);
+        Client savedClient = clientService.saveClient(client);
+        return clientMapper.toDTO(savedClient);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Client> updateClient(@PathVariable Integer id, @RequestBody Client client) {
+    public ResponseEntity<ClientDTO> updateClient(@PathVariable Integer id, @RequestBody ClientDTO clientDTO) {
         if (!clientService.clientExists(id)) {
             return ResponseEntity.notFound().build();
         }
-        client.setId(id);
-        return ResponseEntity.ok(clientService.saveClient(client));
+        clientDTO.setId(id);
+        Client client = clientMapper.toEntity(clientDTO);
+        Client updatedClient = clientService.saveClient(client);
+        return ResponseEntity.ok(clientMapper.toDTO(updatedClient));
     }
 
     @DeleteMapping("/{id}")
