@@ -61,6 +61,7 @@ export const readerService = {
     getCurrentBooks: () => api.get('/reader/current-books'),
     getBookHistory: () => api.get('/reader/book-history'),
     takeBook: (bookId) => api.post('/reader/take-book', { bookId }),
+    returnBook: (journalId) => api.post('/reader/return-book', { journalId }),
 };
 
 export const clientService = {

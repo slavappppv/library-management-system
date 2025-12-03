@@ -55,7 +55,18 @@ const ReaderDashboard = () => {
     };
 
     const handleReturnBook = async (journalId) => {
-        alert('Функционал возврата в разработке');
+        if (!window.confirm('Вернуть книгу?')) return;
+
+        try {
+            const response = await readerService.returnBook(journalId);
+            console.log("Book returned response:", response);
+
+            await loadReaderData();
+            alert('Книга успешно возвращена!');
+        } catch (error) {
+            console.error("Error returning book:", error);
+            alert(error.response?.data || 'Ошибка при возврате книги');
+        }
     };
 
     if (loading) return <div>Загрузка личного кабинета...</div>;
