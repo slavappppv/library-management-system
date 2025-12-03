@@ -63,4 +63,12 @@ export const readerService = {
     takeBook: (bookId) => api.post('/reader/take-book', { bookId }),
 };
 
+export const clientService = {
+    getAllClients: () => api.get('/clients'),
+    getClientById: (id) => api.get(`/clients/${id}`),
+    createClient: (client) => api.post('/clients', client),
+    updateClient: (id, client) => api.put(`/clients/${id}`, client),
+    deleteClient: (id) => api.delete(`/clients/${id}`),
+};
+
 export default api;

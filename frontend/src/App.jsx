@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import BookList from "./components/BookList";
 import Login from "./components/Login";
 import ReaderDashboard from "./components/ReaderDashboard";
+import ReportsPanel from './components/ReportsPanel';
+import ReferencesPanel from './components/ReferencesPanel';
+import JournalList from './components/JournalList';
 import "./App.css";
 
 function App() {
@@ -86,9 +89,9 @@ function App() {
             <>
               {currentView === "books" && <BookList />}
               {currentView === "reader-dashboard" && <ReaderDashboard />} {/* 🆕 */}
-              {currentView === "reference" && <div>Раздел СПРАВОЧНИКИ</div>}
-              {currentView === "journals" && <div>Раздел ЖУРНАЛЫ</div>}
-              {currentView === "reports" && <div>Раздел ОТЧЕТЫ</div>}
+              {currentView === "reference" && <ReferencesPanel />}
+              {currentView === "journals" && <JournalList />}
+              {currentView === "reports" && <ReportsPanel />}
             </>
           )}
         </main>
