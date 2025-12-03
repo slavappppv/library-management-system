@@ -37,8 +37,19 @@ const ReaderDashboard = () => {
     };
 
     const loadBookHistory = async () => {
-        const response = await readerService.getBookHistory(); // 🆕
-        setBookHistory(response.data);
+        try {
+            const response = await readerService.getBookHistory();
+
+            if (Array.isArray(response.data)) {
+                setBookHistory(response.data);
+            } else {
+                console.error('Ожидался массив, но получили:', response.data);
+                setBookHistory([]);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки истории:', error);
+            setBookHistory([]);
+        }
     };
 
     const handleTakeBook = async (bookId) => {
@@ -180,7 +191,7 @@ const ReaderDashboard = () => {
             {activeTab === 'history' && (
                 <div>
                     <h3>История чтения</h3>
-                    {bookHistory.length === 0 ? (
+                    {!Array.isArray(bookHistory) || bookHistory.length === 0 ? (  // ← Добавить проверку Array.isArray
                         <p>История пуста</p>
                     ) : (
                         <div>
@@ -191,10 +202,10 @@ const ReaderDashboard = () => {
                                     margin: '10px 0',
                                     borderRadius: '5px'
                                 }}>
-                                    <h4>{journal.book.name}</h4>
-                                    <p>Тип: {journal.book.bookType?.type}</p>
+                                    <h4>{journal.book?.name || 'Неизвестная книга'}</h4>  {/* ← Добавить ? для безопасного доступа */}
+                                    <p>Тип: {journal.book?.bookType?.type || 'Не указан'}</p>
                                     <p>Дата взятия: {journal.dateBeg}</p>
-                                    <p>Дата возврата: {journal.dateRet}</p>
+                                    <p>Дата возврата: {journal.dateRet || 'Не возвращена'}</p>
                                 </div>
                             ))}
                         </div>
