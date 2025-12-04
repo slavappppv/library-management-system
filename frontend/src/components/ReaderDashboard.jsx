@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { readerService } from '../services/api'; // 🆕 ИМПОРТ readerService
+import { readerService } from '../services/api';
 
 const ReaderDashboard = () => {
     const [activeTab, setActiveTab] = useState('my-books');
@@ -7,10 +7,25 @@ const ReaderDashboard = () => {
     const [availableBooks, setAvailableBooks] = useState([]);
     const [bookHistory, setBookHistory] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fines, setFines] = useState([]);
+    const [totalFine, setTotalFine] = useState(0);
 
     useEffect(() => {
         loadReaderData();
+        loadFines();
     }, []);
+
+    const loadFines = async () => {
+        try {
+            const response = await readerService.getMyFines();
+            setFines(response.data.fines || []);
+            setTotalFine(response.data.total || 0);
+        } catch (error) {
+            console.error('Ошибка загрузки штрафов:', error);
+            setFines([]);
+            setTotalFine(0);
+        }
+    };
 
     const loadReaderData = async () => {
         try {
@@ -27,12 +42,12 @@ const ReaderDashboard = () => {
     };
 
     const loadCurrentBooks = async () => {
-        const response = await readerService.getCurrentBooks(); // 🆕
+        const response = await readerService.getCurrentBooks();
         setCurrentBooks(response.data);
     };
 
     const loadAvailableBooks = async () => {
-        const response = await readerService.getAvailableBooks(); // 🆕
+        const response = await readerService.getAvailableBooks();
         setAvailableBooks(response.data);
     };
 
@@ -73,6 +88,7 @@ const ReaderDashboard = () => {
             console.log("Book returned response:", response);
 
             await loadReaderData();
+            await loadFines(); // Обновить штрафы после возврата
             alert('Книга успешно возвращена!');
         } catch (error) {
             console.error("Error returning book:", error);
@@ -120,10 +136,24 @@ const ReaderDashboard = () => {
                         background: activeTab === 'history' ? '#007bff' : 'transparent',
                         color: activeTab === 'history' ? 'white' : 'black',
                         border: 'none',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        marginRight: '10px'
                     }}
                 >
                     📋 История ({bookHistory.length})
+                </button>
+                {/* КНОПКА ШТРАФОВ - ДОБАВЛЕНО */}
+                <button
+                    onClick={() => setActiveTab('fines')}
+                    style={{
+                        padding: '10px 20px',
+                        background: activeTab === 'fines' ? '#007bff' : 'transparent',
+                        color: activeTab === 'fines' ? 'white' : 'black',
+                        border: 'none',
+                        cursor: 'pointer'
+                    }}
+                >
+                    ⚖️ Мои штрафы ({fines.length})
                 </button>
             </div>
 
@@ -191,7 +221,7 @@ const ReaderDashboard = () => {
             {activeTab === 'history' && (
                 <div>
                     <h3>История чтения</h3>
-                    {!Array.isArray(bookHistory) || bookHistory.length === 0 ? (  // ← Добавить проверку Array.isArray
+                    {!Array.isArray(bookHistory) || bookHistory.length === 0 ? (
                         <p>История пуста</p>
                     ) : (
                         <div>
@@ -202,10 +232,80 @@ const ReaderDashboard = () => {
                                     margin: '10px 0',
                                     borderRadius: '5px'
                                 }}>
-                                    <h4>{journal.book?.name || 'Неизвестная книга'}</h4>  {/* ← Добавить ? для безопасного доступа */}
+                                    <h4>{journal.book?.name || 'Неизвестная книга'}</h4>
                                     <p>Тип: {journal.book?.bookType?.type || 'Не указан'}</p>
                                     <p>Дата взятия: {journal.dateBeg}</p>
                                     <p>Дата возврата: {journal.dateRet || 'Не возвращена'}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ВКЛАДКА ШТРАФОВ - ДОБАВЛЕНО */}
+            {activeTab === 'fines' && (
+                <div>
+                    <h3>⚖️ Мои штрафы</h3>
+
+                    <div style={{
+                        background: totalFine > 0 ? '#fff3cd' : '#d4edda',
+                        padding: '15px',
+                        borderRadius: '8px',
+                        marginBottom: '20px'
+                    }}>
+                        <h4>Общая сумма штрафов: <span style={{color: totalFine > 0 ? '#dc3545' : '#28a745'}}>
+                            {totalFine} ₽
+                        </span></h4>
+                        {totalFine > 0 && (
+                            <p style={{color: '#856404'}}>
+                                ⚠️ Пожалуйста, оплатите штрафы в ближайшее время
+                            </p>
+                        )}
+                    </div>
+
+                    {fines.length === 0 ? (
+                        <p>У вас нет штрафов 🎉</p>
+                    ) : (
+                        <div>
+                            <h4>Детализация штрафов:</h4>
+                            {fines.map((fine, index) => (
+                                <div key={index} style={{
+                                    border: '1px solid #ddd',
+                                    padding: '15px',
+                                    margin: '10px 0',
+                                    borderRadius: '5px',
+                                    background: fine.paid ? '#e8f5e8' : '#ffeaea'
+                                }}>
+                                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                        <div>
+                                            <h5 style={{margin: 0}}>{fine.bookName}</h5>
+                                            <p style={{margin: '5px 0', color: '#666'}}>
+                                                Дата просрочки: {fine.dueDate}
+                                            </p>
+                                            <p style={{margin: '5px 0'}}>
+                                                Дней просрочки: <strong>{fine.daysLate}</strong>
+                                            </p>
+                                        </div>
+                                        <div style={{textAlign: 'right'}}>
+                                            <p style={{
+                                                fontSize: '1.2rem',
+                                                fontWeight: 'bold',
+                                                color: fine.paid ? '#28a745' : '#dc3545'
+                                            }}>
+                                                {fine.amount} ₽
+                                            </p>
+                                            <span style={{
+                                                padding: '3px 8px',
+                                                background: fine.paid ? '#28a745' : '#ffc107',
+                                                color: 'white',
+                                                borderRadius: '4px',
+                                                fontSize: '0.8rem'
+                                            }}>
+                                                {fine.paid ? 'Оплачен' : 'Не оплачен'}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             ))}
                         </div>

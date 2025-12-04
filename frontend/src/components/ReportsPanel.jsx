@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../services/api';  // ← Использовать axios
+import api from '../services/api';
 
 const ReportsPanel = () => {
     const [reportContent, setReportContent] = useState('');
@@ -7,7 +7,7 @@ const ReportsPanel = () => {
     const loadReport = async (endpoint) => {
         try {
             const response = await api.get(`/reports/${endpoint}`, {
-                responseType: 'text'  // ← Для текстового ответа
+                responseType: 'text'
             });
             setReportContent(response.data);
         } catch (error) {

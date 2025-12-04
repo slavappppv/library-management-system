@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { journalService } from '../services/api';
 import GridView from './GridView';
+import JournalForm from './JournalForm';
 
 const JournalList = () => {
     const [journalRecords, setJournalRecords] = useState([]);
@@ -11,10 +12,72 @@ const JournalList = () => {
         startDate: '',
         endDate: ''
     });
+    const [showForm, setShowForm] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState(null);
 
     useEffect(() => {
         loadJournalRecords();
     }, []);
+
+    const handleAdd = () => {
+        setSelectedRecord(null);
+        setShowForm(true);
+    };
+
+    const handleSave = async (journalData) => {
+        try {
+            if (selectedRecord) {
+                await journalService.updateJournalRecord(selectedRecord.id, journalData);
+            } else {
+                await journalService.createJournalRecord(journalData);
+            }
+            setShowForm(false);
+            setSelectedRecord(null);
+            loadJournalRecords();
+            alert('Запись успешно сохранена!');
+        } catch (error) {
+            console.error('Ошибка сохранения:', error);
+
+            let errorMessage = 'Неизвестная ошибка';
+
+            if (error.response?.data) {
+                const errorText = error.response.data;
+                if (errorText.includes('Книги закончились')) {
+                    errorMessage = '❌ Книги закончились! Все экземпляры уже выданы.';
+                } else if (errorText.includes('Нельзя удалить запись')) {
+                    errorMessage = '❌ Нельзя удалить запись: книга еще не возвращена';
+                } else if (errorText.includes('Книга недоступна')) {
+                    errorMessage = '❌ Книга недоступна (нет свободных экземпляров)';
+                } else if (errorText.includes('клиент уже взял эту книгу')) {
+                    errorMessage = '❌ Клиент уже взял эту книгу';
+                } else {
+                    errorMessage = `Ошибка: ${errorText}`;
+                }
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            alert(errorMessage);
+        }
+    };
+
+    const handleEdit = (record) => {
+        setSelectedRecord(record);
+        setShowForm(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Удалить запись из журнала?')) return;
+
+        try {
+            await journalService.deleteJournalRecord(id);
+            loadJournalRecords();
+            alert('Запись удалена');
+        } catch (error) {
+            console.error('Ошибка удаления:', error);
+            alert(error.response?.data || 'Ошибка удаления записи');
+        }
+    };
 
     const loadJournalRecords = async () => {
         try {
@@ -158,6 +221,7 @@ const JournalList = () => {
 
             {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
 
+
             <div style={{ marginTop: '20px' }}>
                 <p>Всего записей: <strong>{filteredRecords.length}</strong></p>
                 <p>Выдано сейчас: <strong style={{ color: '#dc3545' }}>
@@ -165,15 +229,40 @@ const JournalList = () => {
                 </strong></p>
             </div>
 
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <h2>📖 ЖУРНАЛ ВЫДАЧИ КНИГ</h2>
+                <button
+                    onClick={handleAdd}
+                    style={{
+                        padding: '10px 20px',
+                        background: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    ➕ Добавить запись
+                </button>
+            </div>
+
+            {}
+            {showForm && (
+                <JournalForm
+                    journal={selectedRecord}
+                    onSave={handleSave}
+                    onCancel={() => {
+                        setShowForm(false);
+                        setSelectedRecord(null);
+                    }}
+                />
+            )}
+
             <GridView
                 data={filteredRecords}
                 columns={columns}
-                onEdit={(record) => {
-                    alert(`Просмотр записи #${record.id}\nКнига: ${record.book?.name}\nКлиент: ${record.client?.lastName}`);
-                }}
-                onDelete={() => {
-                    alert('Удаление записей журнала недоступно. Используйте возврат книги в личном кабинете.');
-                }}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
             />
         </div>
     );
