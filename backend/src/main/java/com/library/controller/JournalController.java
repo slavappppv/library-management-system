@@ -81,15 +81,30 @@ public class JournalController {
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<JournalDTO> updateJournalRecord(@PathVariable Integer id, @RequestBody JournalDTO journalDTO) {
-        if (!journalService.journalRecordExists(id)) {
-            return ResponseEntity.notFound().build();
+        Journal journal = journalService.getJournalRecordById(id)
+                .orElseThrow(() -> new NotFoundException("Запись не найдена", "Запись журнала не найдена"));
+        if (journalDTO.getBookId() != null && !journalDTO.getBookId().equals(journal.getBook().getId())) {
+            Book newBook = bookRepository.findById(journalDTO.getBookId())
+                    .orElseThrow(() -> new NotFoundException("Книга не найдена", "Книга не найдена"));
+            journal.setBook(newBook);
         }
 
-        Journal journal = journalService.getJournalRecordById(id)
-                .orElseThrow(() -> new RuntimeException("Запись не найдена"));
+        if (journalDTO.getClientId() != null && !journalDTO.getClientId().equals(journal.getClient().getId())) {
+            Client newClient = clientRepository.findById(journalDTO.getClientId())
+                    .orElseThrow(() -> new NotFoundException("Клиент не найден", "Клиент не найден"));
+            journal.setClient(newClient);
+        }
 
-        // Можно обновить только дату возврата
+        if (journalDTO.getDateBeg() != null) {
+            journal.setDateBeg(journalDTO.getDateBeg());
+        }
+
+        if (journalDTO.getDateEnd() != null) {
+            journal.setDateEnd(journalDTO.getDateEnd());
+        }
+
         if (journalDTO.getDateRet() != null) {
             journal.setDateRet(journalDTO.getDateRet());
         }

@@ -6,7 +6,8 @@ const JournalForm = ({ journal, onSave, onCancel }) => {
         bookId: '',
         clientId: '',
         dateBeg: new Date().toISOString().split('T')[0],
-        dateEnd: ''
+        dateEnd: '',
+        dateRet: ''
     });
 
     const [books, setBooks] = useState([]);
@@ -22,8 +23,9 @@ const JournalForm = ({ journal, onSave, onCancel }) => {
             setFormData({
                 bookId: journal.book?.id || '',
                 clientId: journal.client?.id || '',
-                dateBeg: journal.dateBeg || new Date().toISOString().split('T')[0],
-                dateEnd: journal.dateEnd || ''
+                dateBeg: journal.dateBeg ? journal.dateBeg.split('T')[0] : new Date().toISOString().split('T')[0],
+                dateEnd: journal.dateEnd ? journal.dateEnd.split('T')[0] : '',
+                dateRet: journal.dateRet ? journal.dateRet.split('T')[0] : ''
             });
         }
     }, [journal]);
@@ -147,7 +149,7 @@ const JournalForm = ({ journal, onSave, onCancel }) => {
                     />
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
+                <div style={{ marginBottom: '15px' }}>
                     <label style={{ display: 'block', marginBottom: '5px' }}>
                         Вернуть до *
                     </label>
@@ -163,6 +165,28 @@ const JournalForm = ({ journal, onSave, onCancel }) => {
                             borderRadius: '4px'
                         }}
                     />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '5px' }}>
+                        Дата возврата
+                    </label>
+                    <input
+                        type="date"
+                        value={formData.dateRet || ''}
+                        onChange={(e) => setFormData({...formData, dateRet: e.target.value})}
+                        style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                        }}
+                    />
+                    <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '5px' }}>
+                        {formData.dateRet
+                            ? '✅ Книга отмечена как возвращенная'
+                            : '❌ Книга еще не возвращена (оставьте пустым)'}
+                    </small>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px' }}>
