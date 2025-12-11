@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { journalService } from '../services/api';
 import GridView from './GridView';
 import JournalForm from './JournalForm';
+import { showNotification } from '../utils/notification';
 
 const JournalList = () => {
     const [journalRecords, setJournalRecords] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const [filter, setFilter] = useState({
-        status: 'all', // all, active, returned
+        status: 'all',
         startDate: '',
         endDate: ''
     });
@@ -34,30 +34,9 @@ const JournalList = () => {
             setShowForm(false);
             setSelectedRecord(null);
             loadJournalRecords();
-            alert('Запись успешно сохранена!');
+            showNotification('success', 'Запись успешно сохранена!', 3000);
         } catch (error) {
             console.error('Ошибка сохранения:', error);
-
-            let errorMessage = 'Неизвестная ошибка';
-
-            if (error.response?.data) {
-                const errorText = error.response.data;
-                if (errorText.includes('Книги закончились')) {
-                    errorMessage = '❌ Книги закончились! Все экземпляры уже выданы.';
-                } else if (errorText.includes('Нельзя удалить запись')) {
-                    errorMessage = '❌ Нельзя удалить запись: книга еще не возвращена';
-                } else if (errorText.includes('Книга недоступна')) {
-                    errorMessage = '❌ Книга недоступна (нет свободных экземпляров)';
-                } else if (errorText.includes('клиент уже взял эту книгу')) {
-                    errorMessage = '❌ Клиент уже взял эту книгу';
-                } else {
-                    errorMessage = `Ошибка: ${errorText}`;
-                }
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-
-            alert(errorMessage);
         }
     };
 
@@ -72,10 +51,9 @@ const JournalList = () => {
         try {
             await journalService.deleteJournalRecord(id);
             loadJournalRecords();
-            alert('Запись удалена');
+            showNotification('success', 'Запись удалена', 3000);
         } catch (error) {
             console.error('Ошибка удаления:', error);
-            alert(error.response?.data || 'Ошибка удаления записи');
         }
     };
 
@@ -83,10 +61,8 @@ const JournalList = () => {
         try {
             const response = await journalService.getAllJournalRecords();
             setJournalRecords(response.data);
-            setError('');
         } catch (error) {
             console.error('Ошибка загрузки журнала:', error);
-            setError('Ошибка загрузки данных');
         } finally {
             setLoading(false);
         }
@@ -105,10 +81,8 @@ const JournalList = () => {
     const filteredRecords = journalRecords.filter(record => {
         if (filter.status === 'active' && record.dateRet) return false;
         if (filter.status === 'returned' && !record.dateRet) return false;
-
         if (filter.startDate && record.dateBeg < filter.startDate) return false;
         if (filter.endDate && record.dateBeg > filter.endDate) return false;
-
         return true;
     });
 
@@ -159,7 +133,6 @@ const JournalList = () => {
         <div style={{ padding: '20px' }}>
             <h2>📖 ЖУРНАЛ ВЫДАЧИ КНИГ</h2>
 
-            {/* Фильтры */}
             <div style={{
                 marginBottom: '20px',
                 padding: '15px',
@@ -219,9 +192,6 @@ const JournalList = () => {
                 </div>
             </div>
 
-            {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
-
-
             <div style={{ marginTop: '20px' }}>
                 <p>Всего записей: <strong>{filteredRecords.length}</strong></p>
                 <p>Выдано сейчас: <strong style={{ color: '#dc3545' }}>
@@ -246,7 +216,6 @@ const JournalList = () => {
                 </button>
             </div>
 
-            {}
             {showForm && (
                 <JournalForm
                     journal={selectedRecord}

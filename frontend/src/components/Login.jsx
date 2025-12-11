@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { bookService } from '../services/api';
+import api from '../services/api';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [isLogin, setIsLogin] = useState(true);
 
     const [firstName, setFirstName] = useState('');
@@ -15,7 +14,6 @@ const Login = ({ onLogin }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
 
         try {
             const endpoint = isLogin ? '/auth/login' : '/auth/register';
@@ -31,21 +29,16 @@ const Login = ({ onLogin }) => {
                     passportNumber
                 };
 
-            const response = await bookService.post(endpoint, data);
+            const response = await api.post(endpoint, data);
             console.log('Login response:', response.data);
-            console.log('Token:', response.data.token);
-            console.log('Role:', response.data.role);
 
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userRole', response.data.role);
                 onLogin(response.data.role);
-            } else {
-                setError(response.data.error || 'Something went wrong');
             }
         } catch (error) {
             console.log("Error details:", error);
-            setError(error.response?.data || 'Network error');
         }
     };
 
@@ -57,7 +50,6 @@ const Login = ({ onLogin }) => {
         setFatherName('');
         setPassportSeria('');
         setPassportNumber('');
-        setError('');
     };
 
     const handleToggleMode = () => {
@@ -91,7 +83,6 @@ const Login = ({ onLogin }) => {
                     />
                 </div>
 
-                {/* НОВЫЕ ПОЛЯ ДЛЯ РЕГИСТРАЦИИ */}
                 {!isLogin && (
                     <>
                         <div style={{ marginBottom: '15px' }}>
@@ -147,8 +138,6 @@ const Login = ({ onLogin }) => {
                         </div>
                     </>
                 )}
-
-                {error && <div style={{ color: 'red', marginBottom: '15px' }}>{error}</div>}
 
                 <button type="submit" style={{ width: '100%', padding: '10px', background: '#007bff', color: 'white', border: 'none' }}>
                     {isLogin ? 'Войти' : 'Зарегистрироваться'}

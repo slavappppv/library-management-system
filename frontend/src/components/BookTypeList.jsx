@@ -31,8 +31,10 @@ const BookTypeList = () => {
         try {
             if (editingBookType) {
                 await bookTypeService.updateBookType(editingBookType.id, bookTypeData);
+                showNotification('success', 'Тип книги обновлен!');
             } else {
                 await bookTypeService.createBookType(bookTypeData);
+                showNotification('success', 'Тип книги добавлен!');
             }
             setShowForm(false);
             setEditingBookType(null);
@@ -59,10 +61,9 @@ const BookTypeList = () => {
             try {
                 await bookTypeService.deleteBookType(id);
                 await loadBookTypes();
-                setError('');
+                showNotification('success', 'Тип книги удален!');
             } catch (error) {
                 console.error('Ошибка удаления:', error);
-                setError('Ошибка удаления типа книги');
             }
         }
     };

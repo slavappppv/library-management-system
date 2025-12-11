@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { showNotification } from '../utils/notification';
 
 const API_BASE = 'http://localhost:8080/api';
 
@@ -22,11 +23,58 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error);
+
+    // Обработка 401 (истекший токен)
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userRole');
-      window.location.reload();
+      const currentPath = window.location.pathname;
+      // Только если НЕ на странице логина
+      if (!currentPath.includes('/login') && currentPath !== '/') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        showNotification('error', 'Сессия истекла. Пожалуйста, войдите снова.', 3000);
+        setTimeout(() => {
+          window.location.href = '/'; // или '/login'
+        }, 1500);
+      }
+      return Promise.reject(error);
     }
+
+    // Извлекаем сообщение об ошибке
+    let userMessage = 'Произошла ошибка';
+
+    if (error.response?.data) {
+        const errorData = error.response.data;
+
+        if (errorData.userMessage && typeof errorData.userMessage === 'string') {
+            userMessage = errorData.userMessage;
+        }
+        // Если это строка
+        else if (typeof errorData === 'string') {
+            userMessage = errorData;
+        }
+        // Если это объект с полем message/error
+        else if (errorData.message && typeof errorData.message === 'string') {
+            userMessage = errorData.message;
+        }
+        else if (errorData.error && typeof errorData.error === 'string') {
+            userMessage = errorData.error;
+        }
+        // Если ничего не подошло, преобразуем в строку
+        else {
+            userMessage = JSON.stringify(errorData);
+        }
+    }
+    const lowerMessage = userMessage.toLowerCase();
+    if (lowerMessage.includes('10 книг') ||
+        lowerMessage.includes('больше нельзя') ||
+        lowerMessage.includes('лимит')) {
+
+        userMessage = '📚 Превышен лимит! У вас уже 10 книг.\nПожалуйста, верните некоторые книги прежде чем брать новые.';
+    }
+
+    showNotification('error', userMessage, 5000);
+
     return Promise.reject(error);
   }
 );

@@ -1,5 +1,7 @@
 package com.library.service;
 
+import com.library.exception.BusinessException;
+import com.library.exception.NotFoundException;
 import com.library.model.Journal;
 import com.library.model.Book;
 import com.library.model.Client;
@@ -56,14 +58,14 @@ public class JournalService {
     @Transactional
     public Journal takeBook(Integer bookId, Integer clientId) {
         if (journalRepository.existsByBookIdAndClientIdAndDateRetIsNull(bookId, clientId)) {
-            throw new RuntimeException("Клиент уже взял эту книгу");
+            throw new BusinessException("Клиент уже взял эту книгу", "Вы уже взяли эту книгу. Сначала верните её.");
         }
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Книга не найдена"));
+                .orElseThrow(() -> new NotFoundException("Книга не найдена", "Книга не найдена"));
 
         if (book.getCount() <= 0) {
-            throw new RuntimeException("Книга недоступна (нет свободных экземпляров)");
+            throw new BusinessException("Книга недоступна (нет свободных экземпляров)", "Извините, все экземпляры этой книги выданы.");
         }
 
         Client client = clientRepository.getReferenceById(clientId);
@@ -80,10 +82,10 @@ public class JournalService {
     @Transactional
     public Journal returnBook(Integer journalId) {
         Journal journal = journalRepository.findById(journalId)
-                .orElseThrow(() -> new RuntimeException("Запись журнала не найдена"));
+                .orElseThrow(() -> new NotFoundException("Запись журнала не найдена", "Запись о выдаче книги не найдена"));
 
         if (journal.getDateRet() != null) {
-            throw new RuntimeException("Книга уже возвращена");
+            throw new BusinessException("Книга уже возвращена", "Эта книга уже была возвращена ранее.");
         }
 
         journal.setDateRet(LocalDate.now());

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { bookService, clientService } from '../services/api';
 
-const JournalForm = ({ onSave, onCancel }) => {
+const JournalForm = ({ journal, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
         bookId: '',
         clientId: '',
@@ -16,6 +16,17 @@ const JournalForm = ({ onSave, onCancel }) => {
     useEffect(() => {
         loadData();
     }, []);
+
+    useEffect(() => {
+        if (journal) {
+            setFormData({
+                bookId: journal.book?.id || '',
+                clientId: journal.client?.id || '',
+                dateBeg: journal.dateBeg || new Date().toISOString().split('T')[0],
+                dateEnd: journal.dateEnd || ''
+            });
+        }
+    }, [journal]);
 
     const loadData = async () => {
         try {
@@ -67,7 +78,7 @@ const JournalForm = ({ onSave, onCancel }) => {
             borderRadius: '8px',
             background: '#f9f9f9'
         }}>
-            <h3>📖 Добавить запись в журнал</h3>
+            <h3>{journal ? 'Редактирование записи' : 'Добавить запись в журнал'}</h3>
 
             <form onSubmit={handleSubmit}>
                 <div style={{ marginBottom: '15px' }}>
@@ -167,7 +178,7 @@ const JournalForm = ({ onSave, onCancel }) => {
                             cursor: 'pointer'
                         }}
                     >
-                        Добавить
+                        {journal ? 'Сохранить' : 'Добавить'}
                     </button>
 
                     <button

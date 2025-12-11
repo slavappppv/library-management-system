@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/reader/**").hasRole("READER")
                         .requestMatchers("/api/books/**", "/api/clients/**", "/api/book-types/**",
                                 "/api/journal/**", "/api/reports/**").hasRole("ADMIN")
+                        .requestMatchers("/api/journal/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -46,11 +47,10 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ← ДОБАВЬ ЭТОТ БИН
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3001"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

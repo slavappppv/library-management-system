@@ -31,8 +31,10 @@ const ClientList = () => {
         try {
             if (editingClient) {
                 await clientService.updateClient(editingClient.id, clientData);
+                showNotification('success', 'Клиент обновлен!');
             } else {
                 await clientService.createClient(clientData);
+                showNotification('success', 'Клиент добавлен!');
             }
             setShowForm(false);
             setEditingClient(null);
@@ -59,7 +61,7 @@ const ClientList = () => {
             try {
                 await clientService.deleteClient(id);
                 await loadClients();
-                setError('');
+                showNotification('success', 'Клиент удален!');
             } catch (error) {
                 console.error('Ошибка удаления:', error);
                 setError('Ошибка удаления клиента');

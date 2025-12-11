@@ -1,12 +1,23 @@
 package com.library.controller;
 
 import com.library.dto.JournalDTO;
+import com.library.exception.BusinessException;
+import com.library.exception.NotFoundException;
 import com.library.mapper.JournalMapper;
+import com.library.model.Book;
+import com.library.model.Client;
 import com.library.model.Journal;
+import com.library.repository.BookRepository;
+import com.library.repository.ClientRepository;
+import com.library.repository.JournalRepository;
+import com.library.service.BookService;
 import com.library.service.JournalService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +32,15 @@ public class JournalController {
 
     @Autowired
     private JournalMapper journalMapper;
+
+    @Autowired
+    private BookRepository bookRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
+    private JournalRepository journalRepository;
 
     @GetMapping
     public List<JournalDTO> getAllJournalRecords() {
@@ -38,9 +58,26 @@ public class JournalController {
     }
 
     @PostMapping
-    public JournalDTO createJournalRecord(@RequestBody JournalDTO journalDTO) {
-        // Создание через ReaderController.takeBook()
-        throw new UnsupportedOperationException("Используйте /api/reader/take-book для взятия книги");
+    @Transactional
+    public ResponseEntity<?> createJournalRecord(@RequestBody JournalDTO journalDTO) {
+        Book book = bookRepository.findById(journalDTO.getBookId())
+                .orElseThrow(() -> new NotFoundException("Книга не найдена", "Книга не найдена"));
+        if (book.getCount() <= 0) {
+            throw new BusinessException("Книга недоступна", "Книга недоступна (нет свободных экземпляров)");
+        }
+
+        Client client = clientRepository.findById(journalDTO.getClientId())
+                .orElseThrow(() -> new NotFoundException("Клиент не найден", "Клиент не найден"));
+
+        Journal journal = new Journal();
+        journal.setBook(book);
+        journal.setClient(client);
+        journal.setDateBeg(journalDTO.getDateBeg());
+        journal.setDateEnd(journalDTO.getDateEnd());
+
+        Journal savedJournal = journalRepository.save(journal);
+
+        return ResponseEntity.ok(journalMapper.toDTO(savedJournal));
     }
 
     @PutMapping("/{id}")

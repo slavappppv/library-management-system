@@ -13,4 +13,6 @@ public interface JournalRepository extends JpaRepository<Journal, Integer> {
     List<Journal> findByClientIdAndDateRetIsNotNull(Integer clientId);
 
     boolean existsByBookIdAndClientIdAndDateRetIsNull(Integer bookId, Integer clientId);
+
+    List<Journal> findByClientId(Integer clientId);
 }

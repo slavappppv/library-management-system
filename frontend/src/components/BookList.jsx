@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { bookService } from '../services/api';
 import BookForm from './BookForm';
 import GridView from './GridView';
+import { showNotification } from '../utils/notification';
 
 const BookList = () => {
     const [books, setBooks] = useState([]);
@@ -19,6 +20,7 @@ const BookList = () => {
             setBooks(response.data);
         } catch (error) {
             console.error('Ошибка загрузки книг:', error);
+            showNotification('error', 'Ошибка загрузки книг');
         } finally {
             setLoading(false);
         }
@@ -33,6 +35,7 @@ const BookList = () => {
             }
             setShowForm(false);
             loadBooks();
+            showNotification('success', 'Книга сохранена!');
         } catch (error) {
             console.error('Ошибка сохранения:', error);
         }
@@ -53,6 +56,7 @@ const BookList = () => {
             try {
                 await bookService.deleteBook(id);
                 loadBooks();
+                showNotification('success', 'Книга удалена!');
             } catch (error) {
                 console.error('Ошибка удаления:', error);
             }

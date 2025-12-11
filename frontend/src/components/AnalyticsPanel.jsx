@@ -38,6 +38,11 @@ const AnalyticsPanel = () => {
     const handleClientSelect = async (clientId) => {
         setSelectedClientId(clientId);
 
+        if (!clientId) {
+            setClientStats(null);
+            return;
+        }
+
         try {
             const statsRes = await reportService.getClientStats(clientId);
             setClientStats(statsRes.data);
@@ -45,11 +50,6 @@ const AnalyticsPanel = () => {
             console.error('Ошибка загрузки статистики:', error);
             setClientStats(null);
         }
-    };
-
-    const handleSearch = (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        // Можно добавить поиск по имени/фамилии
     };
 
     if (loading) return <div>Загрузка аналитики...</div>;
@@ -62,75 +62,93 @@ const AnalyticsPanel = () => {
 
             {/* Самый большой штраф */}
             <div style={{
-                background: '#e9ecef',
-                padding: '15px',
-                borderRadius: '8px',
-                marginBottom: '20px'
+                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                padding: '20px',
+                borderRadius: '12px',
+                marginBottom: '30px',
+                color: 'white',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
             }}>
-                <h3>💰 Самый большой штраф</h3>
-                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#dc3545' }}>
+                <h3 style={{ margin: 0, color: 'white' }}>💰 Самый большой штраф</h3>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: '10px 0' }}>
                     {maxFine !== null ? `${maxFine} ₽` : 'Нет данных'}
                 </p>
             </div>
 
-            {/* Поиск клиента */}
+            {/* Поиск клиента - ТОЛЬКО ВЫБОР ИЗ СПИСКА */}
             <div style={{ marginBottom: '30px' }}>
-                <h3>🔍 Поиск клиента</h3>
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                    <input
-                        type="text"
-                        placeholder="Поиск по имени или фамилии..."
-                        onChange={handleSearch}
-                        style={{
-                            padding: '10px',
-                            flex: 1,
-                            border: '1px solid #ced4da',
-                            borderRadius: '4px'
-                        }}
-                    />
-                    <select
-                        value={selectedClientId}
-                        onChange={(e) => handleClientSelect(e.target.value)}
-                        style={{
-                            padding: '10px',
-                            minWidth: '200px',
-                            border: '1px solid #ced4da',
-                            borderRadius: '4px'
-                        }}
-                    >
-                        <option value="">Выберите клиента...</option>
-                        {clients.map(client => (
-                            <option key={client.id} value={client.id}>
-                                {client.lastName} {client.firstName} (ID: {client.id})
-                            </option>
-                        ))}
-                    </select>
+                <h3>👤 Выбор клиента для статистики</h3>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', alignItems: 'flex-end' }}>
+                    <div style={{ flex: 1 }}>
+                        <select
+                            value={selectedClientId}
+                            onChange={(e) => handleClientSelect(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                border: '2px solid #667eea',
+                                borderRadius: '8px',
+                                fontSize: '16px',
+                                background: 'white',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <option value="">Выберите клиента...</option>
+                            {clients.map(client => (
+                                <option key={client.id} value={client.id}>
+                                    {client.lastName} {client.firstName}
+                                    {client.fatherName ? ` ${client.fatherName}` : ''}
+                                    {client.passportSeria ? ` (паспорт: ${client.passportSeria} ${client.passportNumber})` : ''}
+                                </option>
+                            ))}
+                        </select>
+                        <p style={{ color: '#666', fontSize: '14px', marginTop: '5px' }}>
+                            Всего клиентов: {clients.length}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Статистика клиента */}
                 {clientStats && (
                     <div style={{
-                        border: '2px solid #007bff',
-                        padding: '15px',
-                        borderRadius: '8px',
-                        background: '#f8f9fa'
+                        border: '2px solid #28a745',
+                        padding: '20px',
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
                     }}>
-                        <h4>📈 Статистика клиента #{clientStats.clientId}</h4>
-                        <div style={{ display: 'flex', gap: '30px', marginTop: '10px' }}>
-                            <div>
-                                <p style={{ color: '#6c757d' }}>Книг на руках:</p>
-                                <p style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                                    {clientStats.activeBooksCount}
+                        <h4 style={{ color: '#28a745', marginBottom: '15px' }}>
+                            📈 Статистика клиента
+                        </h4>
+                        <div style={{ display: 'flex', gap: '30px', marginTop: '10px', flexWrap: 'wrap' }}>
+                            <div style={{
+                                background: 'white',
+                                padding: '15px',
+                                borderRadius: '8px',
+                                flex: 1,
+                                minWidth: '150px',
+                                boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                            }}>
+                                <p style={{ color: '#6c757d', fontSize: '14px' }}>Книг на руках:</p>
+                                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#007bff' }}>
+                                    {clientStats.activeBooksCount || 0}
                                 </p>
                             </div>
-                            <div>
-                                <p style={{ color: '#6c757d' }}>Общий штраф:</p>
+                            <div style={{
+                                background: 'white',
+                                padding: '15px',
+                                borderRadius: '8px',
+                                flex: 1,
+                                minWidth: '150px',
+                                boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                            }}>
+                                <p style={{ color: '#6c757d', fontSize: '14px' }}>Общий штраф:</p>
                                 <p style={{
-                                    fontSize: '1.2rem',
+                                    fontSize: '1.5rem',
                                     fontWeight: 'bold',
-                                    color: clientStats.totalFine > 0 ? '#dc3545' : '#28a745'
+                                    color: (clientStats.totalFine || 0) > 0 ? '#dc3545' : '#28a745'
                                 }}>
-                                    {clientStats.totalFine} ₽
+                                    {clientStats.totalFine || 0} ₽
                                 </p>
                             </div>
                         </div>
@@ -149,12 +167,18 @@ const AnalyticsPanel = () => {
                             <div
                                 key={book.id}
                                 style={{
-                                    border: '1px solid #dee2e6',
-                                    padding: '15px',
-                                    borderRadius: '8px',
+                                    border: 'none',
+                                    padding: '20px',
+                                    borderRadius: '12px',
                                     flex: '1',
                                     minWidth: '200px',
-                                    background: index === 0 ? '#fff3cd' : '#f8f9fa'
+                                    background: index === 0
+                                        ? 'linear-gradient(135deg, #ffd700, #ffcc00)'
+                                        : index === 1
+                                            ? 'linear-gradient(135deg, #c0c0c0, #a9a9a9)'
+                                            : 'linear-gradient(135deg, #cd7f32, #b87333)',
+                                    color: index === 0 ? '#856404' : 'white',
+                                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
                                 }}
                             >
                                 <div style={{
@@ -162,16 +186,17 @@ const AnalyticsPanel = () => {
                                     background: index === 0 ? '#ffc107' :
                                                index === 1 ? '#6c757d' : '#28a745',
                                     color: 'white',
-                                    padding: '4px 8px',
-                                    borderRadius: '4px',
-                                    marginBottom: '10px',
-                                    fontSize: '0.9rem'
+                                    padding: '6px 12px',
+                                    borderRadius: '20px',
+                                    marginBottom: '15px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 'bold'
                                 }}>
-                                    #{index + 1}
+                                    #{index + 1} место
                                 </div>
-                                <h4 style={{ margin: '10px 0' }}>{book.name}</h4>
-                                <p style={{ color: '#6c757d' }}>
-                                    Выдач: <strong>{book.borrowCount}</strong>
+                                <h4 style={{ margin: '10px 0', fontSize: '1.2rem' }}>{book.name}</h4>
+                                <p style={{ color: 'inherit', opacity: 0.9 }}>
+                                    Количество выдач: <strong style={{ fontSize: '1.3rem' }}>{book.borrowCount}</strong>
                                 </p>
                             </div>
                         ))}

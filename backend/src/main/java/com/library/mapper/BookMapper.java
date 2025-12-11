@@ -1,7 +1,6 @@
 package com.library.mapper;
 
 import com.library.dto.BookDTO;
-import com.library.dto.BookTypeDTO;
 import com.library.model.Book;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,9 +33,6 @@ public class BookMapper {
         book.setId(dto.getId());
         book.setName(dto.getName());
         book.setCount(dto.getCount());
-
-        // BookType устанавливается отдельно через service
-        // book.setBookType(bookTypeMapper.toEntity(dto.getBookType()));
 
         return book;
     }

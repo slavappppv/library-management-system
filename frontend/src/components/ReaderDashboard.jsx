@@ -73,10 +73,9 @@ const ReaderDashboard = () => {
             console.log("Book taken response:", response);
 
             await loadReaderData();
-            alert('Книга успешно взята!');
+            showNotification('success', 'Книга успешно взята!');
         } catch (error) {
             console.error("Error taking book:", error);
-            alert(error.response?.data || 'Ошибка при взятии книги');
         }
     };
 
@@ -89,10 +88,10 @@ const ReaderDashboard = () => {
 
             await loadReaderData();
             await loadFines(); // Обновить штрафы после возврата
-            alert('Книга успешно возвращена!');
+            showNotification('success', 'Книга успешно возвращена!');
         } catch (error) {
             console.error("Error returning book:", error);
-            alert(error.response?.data || 'Ошибка при возврате книги');
+            showNotification('success', 'Ошибка при возвращении книги');
         }
     };
 

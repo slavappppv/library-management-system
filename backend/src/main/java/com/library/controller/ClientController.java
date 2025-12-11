@@ -19,7 +19,7 @@ public class ClientController {
     private ClientService clientService;
 
     @Autowired
-    private ClientMapper clientMapper;  // ← Добавить
+    private ClientMapper clientMapper;
 
     @GetMapping
     public List<ClientDTO> getAllClients() {  // ← Возвращать DTO
@@ -36,7 +36,7 @@ public class ClientController {
     }
 
     @PostMapping
-    public ClientDTO createClient(@RequestBody ClientDTO clientDTO) {  // ← Принимать DTO
+    public ClientDTO createClient(@RequestBody ClientDTO clientDTO) {
         Client client = clientMapper.toEntity(clientDTO);
         Client savedClient = clientService.saveClient(client);
         return clientMapper.toDTO(savedClient);
